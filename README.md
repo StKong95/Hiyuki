@@ -36,6 +36,6 @@ handler = WebhookHandler('LineChannelSecret')
 # classes\bot.py
 ```python
 self.line_bot_api = LineBotApi('LineChannelAccess')
-        self.reddit = praw.Reddit(client_id='Client', client_secret="Secret", user_agent='UserAgent')
-        self.da = deviantart.Api("DvartChannel", "DvartSecret")
+self.reddit = praw.Reddit(client_id='Client', client_secret="Secret", user_agent='UserAgent')
+self.da = deviantart.Api("DvartChannel", "DvartSecret")
 ```
