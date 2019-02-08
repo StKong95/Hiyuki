@@ -6,12 +6,13 @@
 - Licensed under: **GPLv3**
 
 ## Packages Used
+- [line-bot-sdk)(https://github.com/line/line-bot-sdk-python)
 - [Pybooru](https://github.com/LuqueDaniel/pybooru)
 - [PRAW](https://github.com/praw-dev/praw)
 - [deviantart](https://github.com/neighbordog/deviantart)
 
 ## Features
-- Fetch images from Danbooru at random or by using tags.
+- Fetch images from Safebooru at random or by using tags.
 - Fetch images from DeviantArt at random or by using a search query.
 - Retrieve a list of threads from a specified subreddit.
 - Retrieve search results for a query within a subreddit.
