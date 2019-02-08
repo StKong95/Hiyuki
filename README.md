@@ -6,7 +6,7 @@
 - Licensed under: **GPLv3**
 
 ## Packages Used
-- [line-bot-sdk)(https://github.com/line/line-bot-sdk-python)
+- [line-bot-sdk](https://github.com/line/line-bot-sdk-python)
 - [Pybooru](https://github.com/LuqueDaniel/pybooru)
 - [PRAW](https://github.com/praw-dev/praw)
 - [deviantart](https://github.com/neighbordog/deviantart)
