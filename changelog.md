@@ -1,5 +1,9 @@
 # Hiyuki - Changelog
 
+## Hiyuki 1.5 - (3/29/2019)
+- Added !tw
+- Updated !rs to show thumbnails as well
+
 ## Hiyuki 1.4 - (2/4/2019)
 - Added !bpm
 

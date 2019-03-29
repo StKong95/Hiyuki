@@ -7,13 +7,23 @@ from linebot import (
 )
 from linebot.exceptions import *
 from linebot.models import *
+from pybooru import Danbooru
+import deviantart
+import praw
+from twitter import *
 
 app = Flask(__name__)
 
-# Init reply bot
-bot = BotClass()
-# Secret
-handler = WebhookHandler('{LineChannelSecret}')
+# Tokens
+handler = WebhookHandler('LineChannelSecret')
+line = LineBotApi('LineChannelAccess')
+reddit = praw.Reddit(client_id='Client', client_secret="Secret", user_agent='UserAgent')
+dvart = deviantart.Api("DvartChannel", "DvartSecret")
+tw = Twitter(
+    auth=OAuth(token, token_secret, consumer_key, consumer_secret))
+
+# Initialize bot
+bot = BotClass(line, reddit, dvart, tw)
 
 
 @app.route("/callback", methods=['POST'])
@@ -34,10 +44,9 @@ def callback():
 # Runs when a message is received
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    """
-    message = TextSendMessage(text=event.message.text)
-    line_bot_api.reply_message(event.reply_token, message)
-    """
+    # message = TextSendMessage(text=event.message.text)
+    # line_bot_api.reply_message(event.reply_token, message)
+
     # ! Bot Command
     if event.message.text[0] == '!':
         bot.check(event)

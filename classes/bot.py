@@ -13,17 +13,19 @@ from linebot.models import *
 import re
 import praw
 import json
+from twitter import *
 
 
 # bot reply class
 class BotClass:
-    def __init__(self):
+    def __init__(self, line, reddit, dvart, tw):
         self.client = Danbooru(site_url='https://safebooru.donmai.us/')
         self.limit = 3
         self.bpm = 660
-        self.line_bot_api = LineBotApi('{LineChannelAccess}')
-        self.reddit = praw.Reddit(client_id='{Client}', client_secret="{Secret}", user_agent='{UserAgent}')
-        self.da = deviantart.Api("{DvartChannel", "DvartSecret")
+        self.line_bot_api = line
+        self.reddit = reddit
+        self.da = dvart
+        self.tw = tw
 
     # Check input and reply according
     def check(self, event):
@@ -83,13 +85,19 @@ class BotClass:
 
         # !rs - Display information about a random Runescape item
         elif check.group(1) == "!rs":
-            url = ("https://www.osrsbox.com/osrsbox-db/items-json/{0}.json".format(randint(0, 23063)))
+            random = randint(0, 23100)
+            url = ("https://www.osrsbox.com/osrsbox-db/items-json/{0}.json".format(random))
             response = urlopen(url)
             data = response.read().decode("utf-8")
-            name = re.search(r"\"name\": \"(\w.+)\",", data)
-            examine = re.search(r"\"examine\": \"(\w.+)\",", data)
-            message = "{0}\n\n{1}".format(name.group(1), examine.group(1))
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+            json_obj = json.loads(data)
+            message = "{0}\n\n{1}".format(json_obj["name"], json_obj["examine"])
+            self.line_bot_api.reply_message(event.reply_token,
+                                            [ImageSendMessage(
+                                                original_content_url='https://www.osrsbox.com/osrsbox-db/items-icons/{0}.png'.format(
+                                                    random),
+                                                preview_image_url='https://www.osrsbox.com/osrsbox-db/items-icons/{0}.png'.format(
+                                                    random)),
+                                                TextSendMessage(text=message)])
 
         # !dvart - DeviantArt
         elif check.group(1) == "!dvart":
@@ -130,6 +138,14 @@ class BotClass:
                     self.line_bot_api.reply_message(event.reply_token,
                                                     TextSendMessage(
                                                         text="BPM is currently set to {0}.".format(self.bpm)))
+
+        # !tw - Retrieve latest Tweet from specified username
+        elif check.group(1) == "!tw":
+            check = re.match(r"!tw\s((?:#)?\w+(?:\s\w+)*)?", event.message.text)
+            obj = self.tw.statuses.user_timeline(screen_name=check.group(1))
+            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(
+                text="@{0} ({1})\n\n{2}".format(obj[0]['user']['screen_name'], obj[0]['created_at'],
+                                                obj[0]['text'])))
 
     # DeviantArt search, multiple tries or else not found
     def dvart(self, event, loop, max, search):
