@@ -33,8 +33,7 @@ class BotClass:
 
         # Command list
         if check.group(1) == "!help":
-            message = "Commands:\n!tag {x}\n!random\n!rs\n!reddit {sub}\n!rsearch {sub} {x}\n!dvart {x}\n!bpm set #\n!bpm #"
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+            message = "Commands:\n!tag [query]\n!random\n!dvart [query]\n!rs\n!reddit [subreddit]\n!rsearch [subreddit] [query]\n!tw [name]\n!bpm set [###]\n!bpm [###]"
 
         # !random !tag - Image functions
         elif check.group(1) == "!random":
