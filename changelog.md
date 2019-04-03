@@ -1,5 +1,8 @@
 # Hiyuki - Changelog
 
+## Hiyuki 1.5 - (4/2/2019)
+- Updated !tw to show images and videos
+
 ## Hiyuki 1.5 - (3/29/2019)
 - Added !tw
 - Updated !rs to show thumbnails as well

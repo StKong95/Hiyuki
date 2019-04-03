@@ -2,7 +2,7 @@
 
 **Hiyuki** is a Line Bot with access to the APIs of Danbooru, DeviantArt, Reddit, and Twitter. This bot can retrieve and send content into Line chatrooms.
 
-- Version: **1.5**
+- Version: **1.6**
 - Licensed under: **GPLv3**
 
 ## Packages Used

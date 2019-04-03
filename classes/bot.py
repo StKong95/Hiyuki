@@ -34,6 +34,7 @@ class BotClass:
         # Command list
         if check.group(1) == "!help":
             message = "Commands:\n!tag [query]\n!random\n!dvart [query]\n!rs\n!reddit [subreddit]\n!rsearch [subreddit] [query]\n!tw [name]\n!bpm set [###]\n!bpm [###]"
+            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
 
         # !random !tag - Image functions
         elif check.group(1) == "!random":
@@ -141,10 +142,42 @@ class BotClass:
         # !tw - Retrieve latest Tweet from specified username
         elif check.group(1) == "!tw":
             check = re.match(r"!tw\s((?:#)?\w+(?:\s\w+)*)?", event.message.text)
-            obj = self.tw.statuses.user_timeline(screen_name=check.group(1))
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                text="@{0} ({1})\n\n{2}".format(obj[0]['user']['screen_name'], obj[0]['created_at'],
-                                                obj[0]['text'])))
+
+            # Check for user's existence
+            try:
+                obj = self.tw.statuses.user_timeline(screen_name=check.group(1))
+
+                text = TextSendMessage(
+                    text="@{0} ({1})\n\n{2}".format(obj[0]['user']['screen_name'], obj[0]['created_at'],
+                                                    obj[0]['text']))
+
+                # Check for video then image.
+                try:
+                    video = VideoSendMessage(
+                        original_content_url='{0}'.format(
+                            obj[0]['extended_entities']['media'][0]['video_info']['variants'][0]['url']),
+                        preview_image_url='{0}'.format(
+                            obj[0]['entities']['media'][0]['media_url_https']))
+                    self.line_bot_api.reply_message(event.reply_token, [text, video])
+
+                # If no video is posted.
+                except KeyError:
+                    try:
+                        image = ImageSendMessage(
+                            original_content_url=obj[0]['entities']['media'][0][
+                                'media_url_https'],
+                            preview_image_url='{0}'.format(
+                                obj[0]['entities']['media'][0]['media_url_https']))
+                        self.line_bot_api.reply_message(event.reply_token, [text, image])
+
+                    # If no image is posted.
+                    except KeyError:
+                        self.line_bot_api.reply_message(event.reply_token, text)
+
+            # If user is not found.
+            except:
+                self.line_bot_api.reply_message(event.reply_token, TextSendMessage(
+                    text="User not found."))
 
     # DeviantArt search, multiple tries or else not found
     def dvart(self, event, loop, max, search):
