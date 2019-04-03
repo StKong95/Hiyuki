@@ -32,6 +32,9 @@
 - !bpm set [###]
 - !bpm [###]
 
+## Screenshot
+![Hiyuki](https://user-images.githubusercontent.com/45186205/53592449-4d3b2180-3b64-11e9-8f4f-4cd2df470bd5.png)
+
 ## Required Tokens
 # Hiyuki.py
 ```python
