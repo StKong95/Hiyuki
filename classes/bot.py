@@ -33,8 +33,9 @@ class BotClass:
 
         # Command list
         if check.group(1) == "!help":
-            message = "Commands:\n!tag [query]\n!random\n!dvart [query]\n!rs\n!reddit [subreddit]\n!rsearch [subreddit] [query]\n!tw [name]\n!bpm set [###]\n!bpm [###]"
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+            message = TextSendMessage(
+                text="Commands:\n!tag [query]\n!random\n!dvart [query]\n!rs\n!reddit [subreddit]\n!rsearch [subreddit] [query]\n!tw [name] {#}\n!bpm set [###]\n!bpm [###]")
+            self.line_bot_api.reply_message(event.reply_token, message)
 
         # !random !tag - Image functions
         elif check.group(1) == "!random":
@@ -44,44 +45,46 @@ class BotClass:
 
         # !site - Check current site
         elif check.group(1) == "!site":
-            message = self.client.site_url
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+            message = TextSendMessage(text=self.client.site_url)
+            self.line_bot_api.reply_message(event.reply_token, message)
 
         # !hiyuki - Safe mode toggle
         elif check.group(1) == "!hiyuki" and check.group(3) == "lewd":
             self.client = Danbooru('danbooru')
-            message = "Safe Mode Off."
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+            message = TextSendMessage(text="Safe Mode Off.")
+            self.line_bot_api.reply_message(event.reply_token, message)
 
         elif check.group(1) == "!hiyuki":
             self.client = Danbooru(site_url='https://safebooru.donmai.us/')
-            message = "Hiyuki Online!"
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+            message = TextSendMessage(text="Hiyuki Online!")
+            self.line_bot_api.reply_message(event.reply_token, message)
 
         # !reddit - Reddit Hot
         elif check.group(1) == "!reddit":
             check = re.match(r"!reddit\s(\w+)?", event.message.text)
             subreddit = self.reddit.subreddit(check.group(1))
-            message = "r/{0}\n\n".format(check.group(1))
+            search = "r/{0}\n\n".format(check.group(1))
             for submission in subreddit.hot(limit=self.limit):
-                message += "{0}\n{1}\n\n".format(submission.title, submission.url)
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+                search += "{0}\n{1}\n\n".format(submission.title, submission.url)
+            message = TextSendMessage(text=search)
+            self.line_bot_api.reply_message(event.reply_token, message)
 
         # !rsearch - Reddit Search
         elif check.group(1) == "!rsearch":
             check = re.match(r"!rsearch\s(\w+)?(\s)?(\w+)?", event.message.text)
-            message = "Searching for \"{0}\" in r/{1}:\n\n".format(check.group(3), check.group(1))
+            search = "Searching for \"{0}\" in r/{1}:\n\n".format(check.group(3), check.group(1))
             for submission in self.reddit.subreddit(check.group(1)).search(check.group(3), limit=self.limit):
-                message += "{0}\n{1}\n\n".format(submission.title, submission.url)
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+                search += "{0}\n{1}\n\n".format(submission.title, submission.url)
+            message = TextSendMessage(text=search)
+            self.line_bot_api.reply_message(event.reply_token, message)
 
         # !limit - Reddit Limit
         elif check.group(1) == "!limit":
             check = re.match(r"!limit\s(\d)?", event.message.text)
             if check.group(1) is not None:
                 self.limit = int(check.group(1))
-            message = "Limit set to {0}.".format(self.limit)
-            self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+            message = TextSendMessage(text="Limit set to {0}.".format(self.limit))
+            self.line_bot_api.reply_message(event.reply_token, message)
 
         # !rs - Display information about a random Runescape item
         elif check.group(1) == "!rs":
@@ -90,14 +93,14 @@ class BotClass:
             response = urlopen(url)
             data = response.read().decode("utf-8")
             json_obj = json.loads(data)
-            message = "{0}\n\n{1}".format(json_obj["name"], json_obj["examine"])
+            message = TextSendMessage(text="{0}\n\n{1}".format(json_obj["name"], json_obj["examine"]))
+            image = ImageSendMessage(
+                original_content_url='https://www.osrsbox.com/osrsbox-db/items-icons/{0}.png'.format(
+                    random),
+                preview_image_url='https://www.osrsbox.com/osrsbox-db/items-icons/{0}.png'.format(
+                    random))
             self.line_bot_api.reply_message(event.reply_token,
-                                            [ImageSendMessage(
-                                                original_content_url='https://www.osrsbox.com/osrsbox-db/items-icons/{0}.png'.format(
-                                                    random),
-                                                preview_image_url='https://www.osrsbox.com/osrsbox-db/items-icons/{0}.png'.format(
-                                                    random)),
-                                                TextSendMessage(text=message)])
+                                            [image, message])
 
         # !dvart - DeviantArt
         elif check.group(1) == "!dvart":
@@ -108,10 +111,14 @@ class BotClass:
         # !bpm - BPM calculator
         elif check.group(1) == "!bpm":
             check = re.match(r"(!bpm+?)(\s)*(set)*(\s)*(\d+)*", event.message.text)
+
+            # Set the target BPM
             if check.group(3) == "set":
                 self.bpm = int(check.group(5))
-                self.line_bot_api.reply_message(event.reply_token,
-                                                TextSendMessage(text="BPM set to {0}.".format(self.bpm)))
+                message = TextSendMessage(text="BPM set to {0}.".format(self.bpm))
+                self.line_bot_api.reply_message(event.reply_token, message)
+
+            # Do BPM multiplication calculations
             else:
                 if check.group(5) is not None:
                     input = int(check.group(5))
@@ -128,56 +135,64 @@ class BotClass:
                     low = lower * input
                     up = upper * input
                     if upper == lower or calc == lower:
-                        message = "Target: {0}\nInput: {1}\n\n{2}x = {3}".format(self.bpm, input, lower, low)
+                        message = TextSendMessage(
+                            text="Target: {0}\nInput: {1}\n\n{2}x = {3}".format(self.bpm, input, lower, low))
                     else:
-                        message = "Target: {0}\nInput: {1}\n\n{2}x = {3}\n{4}x = {5}".format(self.bpm, input,
-                                                                                             lower, low,
-                                                                                             upper, up)
-                    self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text=message))
+                        message = TextSendMessage(
+                            text="Target: {0}\nInput: {1}\n\n{2}x = {3}\n{4}x = {5}".format(self.bpm, input,
+                                                                                            lower, low,
+                                                                                            upper, up))
+                    self.line_bot_api.reply_message(event.reply_token, message)
+
+                # Show the current target BPM if nothing is specified
                 else:
-                    self.line_bot_api.reply_message(event.reply_token,
-                                                    TextSendMessage(
-                                                        text="BPM is currently set to {0}.".format(self.bpm)))
+                    message = TextSendMessage(text="BPM is currently set to {0}.".format(self.bpm))
+                    self.line_bot_api.reply_message(event.reply_token, message)
 
         # !tw - Retrieve latest Tweet from specified username
         elif check.group(1) == "!tw":
-            check = re.match(r"!tw\s((?:#)?\w+(?:\s\w+)*)?", event.message.text)
+            check = re.match(r"!tw\s(\w+)?\s?(\d+)?", event.message.text)
+
+            # Check for count
+            if check.group(2) is None or int(check.group(2)) < 0:
+                i = 0
+            else:
+                i = int(check.group(2))
 
             # Check for user's existence
             try:
-                obj = self.tw.statuses.user_timeline(screen_name=check.group(1))
+                obj = self.tw.statuses.user_timeline(screen_name=check.group(1), count=i + 1)
 
                 text = TextSendMessage(
-                    text="@{0} ({1})\n\n{2}".format(obj[0]['user']['screen_name'], obj[0]['created_at'],
-                                                    obj[0]['text']))
+                    text="@{0} ({1})\n\n{2}".format(obj[i]['user']['screen_name'], obj[i]['created_at'],
+                                                    obj[i]['text']))
 
-                # Check for video then image.
+                # Check for video
                 try:
                     video = VideoSendMessage(
                         original_content_url='{0}'.format(
-                            obj[0]['extended_entities']['media'][0]['video_info']['variants'][0]['url']),
+                            obj[i]['extended_entities']['media'][0]['video_info']['variants'][0]['url']),
                         preview_image_url='{0}'.format(
-                            obj[0]['entities']['media'][0]['media_url_https']))
+                            obj[i]['entities']['media'][0]['media_url_https']))
                     self.line_bot_api.reply_message(event.reply_token, [text, video])
 
-                # If no video is posted.
+                # If no video is posted, check for image.
                 except KeyError:
                     try:
                         image = ImageSendMessage(
-                            original_content_url=obj[0]['entities']['media'][0][
-                                'media_url_https'],
-                            preview_image_url='{0}'.format(
-                                obj[0]['entities']['media'][0]['media_url_https']))
+                            original_content_url=obj[i]['entities']['media'][0]['media_url_https'],
+                            preview_image_url=obj[i]['entities']['media'][0]['media_url_https'])
                         self.line_bot_api.reply_message(event.reply_token, [text, image])
 
-                    # If no image is posted.
+                    # If no image is posted, send text only.
                     except KeyError:
                         self.line_bot_api.reply_message(event.reply_token, text)
 
             # If user is not found.
             except:
-                self.line_bot_api.reply_message(event.reply_token, TextSendMessage(
-                    text="User not found."))
+                message = TextSendMessage(
+                    text="User not found.")
+                self.line_bot_api.reply_message(event.reply_token, message)
 
     # DeviantArt search, multiple tries or else not found
     def dvart(self, event, loop, max, search):
@@ -191,13 +206,14 @@ class BotClass:
 
             message = re.match(r"{'src': '(\w.+)',", send)
             if message is not None:
-                self.line_bot_api.reply_message(event.reply_token,
-                                                ImageSendMessage(original_content_url=message.group(1),
-                                                                 preview_image_url=message.group(1)))
+                image = ImageSendMessage(original_content_url=message.group(1),
+                                         preview_image_url=message.group(1))
+                self.line_bot_api.reply_message(event.reply_token, image)
                 loop = 10
             else:
                 if loop == 9:
-                    self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text="Not Found."))
+                    message = TextSendMessage(text="Not Found.")
+                    self.line_bot_api.reply_message(event.reply_token, message)
                     loop += 1
                 else:
                     self.dvart(event, loop + 1, max // 3, search)
@@ -206,8 +222,9 @@ class BotClass:
     def reply(self, event, *tag):
         for post in self.client.post_list(tags=tag, limit=1, random=True):
             try:
-                self.line_bot_api.reply_message(event.reply_token,
-                                                ImageSendMessage(original_content_url=post['file_url'],
-                                                                 preview_image_url=post['file_url']))
+                image = ImageSendMessage(original_content_url=post['file_url'],
+                                         preview_image_url=post['file_url'])
+                self.line_bot_api.reply_message(event.reply_token, image)
             except KeyError:
-                self.line_bot_api.reply_message(event.reply_token, TextSendMessage(text="Too Lewd!"))
+                message = TextSendMessage(text="Too Lewd!")
+                self.line_bot_api.reply_message(event.reply_token, message)

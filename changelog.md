@@ -1,11 +1,14 @@
 # Hiyuki - Changelog
 
+## Hiyuki 1.65 - (4/2/2019)
+- Updated !tw to retrieve past Tweets
+
 ## Hiyuki 1.6 - (4/2/2019)
 - Updated !tw to show images and videos
 
 ## Hiyuki 1.5 - (3/29/2019)
 - Added !tw
-- Updated !rs to show thumbnails as well
+- Updated !rs to show thumbnails
 
 ## Hiyuki 1.4 - (2/4/2019)
 - Added !bpm
