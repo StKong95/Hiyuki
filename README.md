@@ -34,6 +34,9 @@
 
 ## Screenshot
 ![Hiyuki](https://user-images.githubusercontent.com/45186205/53592449-4d3b2180-3b64-11e9-8f4f-4cd2df470bd5.png)
+![Hiyuki2](https://user-images.githubusercontent.com/45186205/55526651-df52b000-5663-11e9-9190-8a573ea29b5c.png)
+![Hiyuki3](https://user-images.githubusercontent.com/45186205/55526748-280a6900-5664-11e9-8509-c4a3aa4cd26b.png)
+![Hiyuki4](https://user-images.githubusercontent.com/45186205/55527029-5a689600-5665-11e9-9d10-d08ac47d3019.png)
 
 ## Required Tokens
 # Hiyuki.py
