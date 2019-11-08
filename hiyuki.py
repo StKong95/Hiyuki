@@ -11,19 +11,23 @@ from pybooru import Danbooru
 import deviantart
 import praw
 from twitter import *
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 app = Flask(__name__)
 
 # Tokens
-handler = WebhookHandler('LineChannelSecret')
-line = LineBotApi('LineChannelAccess')
-reddit = praw.Reddit(client_id='Client', client_secret="Secret", user_agent='UserAgent')
-dvart = deviantart.Api("DvartChannel", "DvartSecret")
+handler = WebhookHandler('LINE ChannelSecret')
+line = LineBotApi('LINE ChannelAccess')
+reddit = praw.Reddit(client_id='REDDIT Client',
+                     client_secret="REDDIT Secret", user_agent='REDDIT UserAgent')
+dvart = deviantart.Api('DVART Channel', 'DVART Secret')
 tw = Twitter(
-    auth=OAuth(token, token_secret, consumer_key, consumer_secret))
+    auth=OAuth('TWITTER token', 'TWITTER token_secret', 'TWITTER consumer_key', 'TWITTER consumer_secret'))
+youtube = build("youtube", "v3", developerKey="GOOGLE API KEY")
 
 # Initialize bot
-bot = BotClass(line, reddit, dvart, tw)
+bot = BotClass(line, reddit, dvart, tw, youtube)
 
 
 @app.route("/callback", methods=['POST'])

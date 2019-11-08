@@ -1,5 +1,8 @@
 # Hiyuki - Changelog
 
+## Hiyuki 1.8 - (11/7/2019)
+- Added !yt to retrieve YouTube results.
+
 ## Hiyuki 1.65 - (4/2/2019)
 - Updated !tw to retrieve past Tweets
 

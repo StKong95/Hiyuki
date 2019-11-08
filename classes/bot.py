@@ -14,11 +14,13 @@ import re
 import praw
 import json
 from twitter import *
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 
 # bot reply class
 class BotClass:
-    def __init__(self, line, reddit, dvart, tw):
+    def __init__(self, line, reddit, dvart, tw, youtube):
         self.client = Danbooru(site_url='https://safebooru.donmai.us/')
         self.limit = 3
         self.bpm = 660
@@ -26,6 +28,7 @@ class BotClass:
         self.reddit = reddit
         self.da = dvart
         self.tw = tw
+        self.yt = youtube
 
     # Check input and reply according
     def check(self, event):
@@ -34,7 +37,7 @@ class BotClass:
         # Command list
         if check.group(1) == "!help":
             message = TextSendMessage(
-                text="Commands:\n!tag [query]\n!random\n!dvart [query]\n!rs\n!reddit [subreddit]\n!rsearch [subreddit] [query]\n!tw [name] {#}\n!bpm set [###]\n!bpm [###]")
+                text="Commands:\n!tag [query]\n!random\n!dvart [query]\n!rs\n!reddit [subreddit]\n!rsearch [subreddit] [query]\n!tw [name] {#}\n!yt [keywords]\n!bpm set [###]\n!bpm [###]")
             self.line_bot_api.reply_message(event.reply_token, message)
 
         # !random !tag - Image functions
@@ -65,16 +68,20 @@ class BotClass:
             subreddit = self.reddit.subreddit(check.group(1))
             search = "r/{0}\n\n".format(check.group(1))
             for submission in subreddit.hot(limit=self.limit):
-                search += "{0}\n{1}\n\n".format(submission.title, submission.url)
+                search += "{0}\n{1}\n\n".format(submission.title,
+                                                submission.url)
             message = TextSendMessage(text=search)
             self.line_bot_api.reply_message(event.reply_token, message)
 
         # !rsearch - Reddit Search
         elif check.group(1) == "!rsearch":
-            check = re.match(r"!rsearch\s(\w+)?(\s)?(\w+)?", event.message.text)
-            search = "Searching for \"{0}\" in r/{1}:\n\n".format(check.group(3), check.group(1))
+            check = re.match(r"!rsearch\s(\w+)?(\s)?(\w+)?",
+                             event.message.text)
+            search = "Searching for \"{0}\" in r/{1}:\n\n".format(
+                check.group(3), check.group(1))
             for submission in self.reddit.subreddit(check.group(1)).search(check.group(3), limit=self.limit):
-                search += "{0}\n{1}\n\n".format(submission.title, submission.url)
+                search += "{0}\n{1}\n\n".format(submission.title,
+                                                submission.url)
             message = TextSendMessage(text=search)
             self.line_bot_api.reply_message(event.reply_token, message)
 
@@ -83,17 +90,20 @@ class BotClass:
             check = re.match(r"!limit\s(\d)?", event.message.text)
             if check.group(1) is not None:
                 self.limit = int(check.group(1))
-            message = TextSendMessage(text="Limit set to {0}.".format(self.limit))
+            message = TextSendMessage(
+                text="Limit set to {0}.".format(self.limit))
             self.line_bot_api.reply_message(event.reply_token, message)
 
         # !rs - Display information about a random Runescape item
         elif check.group(1) == "!rs":
             random = randint(0, 23100)
-            url = ("https://www.osrsbox.com/osrsbox-db/items-json/{0}.json".format(random))
+            url = (
+                "https://www.osrsbox.com/osrsbox-db/items-json/{0}.json".format(random))
             response = urlopen(url)
             data = response.read().decode("utf-8")
             json_obj = json.loads(data)
-            message = TextSendMessage(text="{0}\n\n{1}".format(json_obj["name"], json_obj["examine"]))
+            message = TextSendMessage(text="{0}\n\n{1}".format(
+                json_obj["name"], json_obj["examine"]))
             image = ImageSendMessage(
                 original_content_url='https://www.osrsbox.com/osrsbox-db/items-icons/{0}.png'.format(
                     random),
@@ -110,12 +120,14 @@ class BotClass:
 
         # !bpm - BPM calculator
         elif check.group(1) == "!bpm":
-            check = re.match(r"(!bpm+?)(\s)*(set)*(\s)*(\d+)*", event.message.text)
+            check = re.match(r"(!bpm+?)(\s)*(set)*(\s)*(\d+)*",
+                             event.message.text)
 
             # Set the target BPM
             if check.group(3) == "set":
                 self.bpm = int(check.group(5))
-                message = TextSendMessage(text="BPM set to {0}.".format(self.bpm))
+                message = TextSendMessage(
+                    text="BPM set to {0}.".format(self.bpm))
                 self.line_bot_api.reply_message(event.reply_token, message)
 
             # Do BPM multiplication calculations
@@ -146,7 +158,8 @@ class BotClass:
 
                 # Show the current target BPM if nothing is specified
                 else:
-                    message = TextSendMessage(text="BPM is currently set to {0}.".format(self.bpm))
+                    message = TextSendMessage(
+                        text="BPM is currently set to {0}.".format(self.bpm))
                     self.line_bot_api.reply_message(event.reply_token, message)
 
         # !tw - Retrieve latest Tweet from specified username
@@ -161,7 +174,8 @@ class BotClass:
 
             # Check for user's existence
             try:
-                obj = self.tw.statuses.user_timeline(screen_name=check.group(1), count=i + 1)
+                obj = self.tw.statuses.user_timeline(
+                    screen_name=check.group(1), count=i + 1)
 
                 text = TextSendMessage(
                     text="@{0} ({1})\n\n{2}".format(obj[i]['user']['screen_name'], obj[i]['created_at'],
@@ -174,7 +188,8 @@ class BotClass:
                             obj[i]['extended_entities']['media'][0]['video_info']['variants'][0]['url']),
                         preview_image_url='{0}'.format(
                             obj[i]['entities']['media'][0]['media_url_https']))
-                    self.line_bot_api.reply_message(event.reply_token, [text, video])
+                    self.line_bot_api.reply_message(
+                        event.reply_token, [text, video])
 
                 # If no video is posted, check for image.
                 except KeyError:
@@ -182,11 +197,13 @@ class BotClass:
                         image = ImageSendMessage(
                             original_content_url=obj[i]['entities']['media'][0]['media_url_https'],
                             preview_image_url=obj[i]['entities']['media'][0]['media_url_https'])
-                        self.line_bot_api.reply_message(event.reply_token, [text, image])
+                        self.line_bot_api.reply_message(
+                            event.reply_token, [text, image])
 
                     # If no image is posted, send text only.
                     except KeyError:
-                        self.line_bot_api.reply_message(event.reply_token, text)
+                        self.line_bot_api.reply_message(
+                            event.reply_token, text)
 
             # If user is not found.
             except:
@@ -194,12 +211,28 @@ class BotClass:
                     text="User not found.")
                 self.line_bot_api.reply_message(event.reply_token, message)
 
+        # !yt - Retrieve search results of videos in YouTube using keywords
+        elif check.group(1) == "!yt":
+            check = re.match(r"!yt\s(.+)?", event.message.text)
+            search_response = self.yt.search().list(
+                part="snippet", maxResults=5, q=check.group(1)).execute()
+
+            videos = []
+            for search_result in search_response.get('items', []):
+                if search_result['id']['kind'] == 'youtube#video':
+                    videos.append('%s %s' % (search_result['snippet']['title'],
+                                             "\nhttps://youtu.be/"+search_result['id']['videoId']))
+            message = TextSendMessage(text="YouTube results for \"{0}\":\n\n{1}".format(
+                check.group(1), '\n\n'.join(videos)))
+            self.line_bot_api.reply_message(event.reply_token, message)
+
     # DeviantArt search, multiple tries or else not found
     def dvart(self, event, loop, max, search):
         while loop < 10:
             send = ""
             deviations = []
-            fetched_deviations = self.da.browse(endpoint='newest', q=search, limit=1, offset=randint(0, max))
+            fetched_deviations = self.da.browse(
+                endpoint='newest', q=search, limit=1, offset=randint(0, max))
             deviations += fetched_deviations['results']
             for deviation in deviations:
                 send += "{0}".format(deviation.content)
